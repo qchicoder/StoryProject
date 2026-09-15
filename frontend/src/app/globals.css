@@ -1,0 +1,246 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #F7F5F0;
+  --foreground: #242424;
+  --surface: #FFFDF8;
+  --slate: #1F2937;
+  --terracotta: #C65D3A;
+  --parchment-border: #E5E0D8;
+}
+
+html.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --surface: #1e293b;
+  --slate: #0f172a;
+  --parchment-border: #334155;
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark header {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Universal font color & background overrides for Dark Mode */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark p,
+html.dark span,
+html.dark a,
+html.dark label,
+html.dark td,
+html.dark th,
+html.dark strong {
+  color: #f8fafc;
+}
+
+/* Force all dark text color classes to bright white/slate-50 in dark mode */
+html.dark [class*="text-[#0a1422]"],
+html.dark [class*="text-[#1b1c1c]"],
+html.dark [class*="text-[#242424]"],
+html.dark [class*="text-[#1F2937]"],
+html.dark [class*="text-[#1f2937]"],
+html.dark [class*="text-charcoal"] {
+  color: #f8fafc !important;
+}
+
+/* Muted secondary text in dark mode */
+html.dark [class*="text-[#75777c]"],
+html.dark [class*="text-[#777777]"],
+html.dark [class*="text-[#44474c]"] {
+  color: #cbd5e1 !important;
+}
+
+/* Accent terracotta/orange text stays vibrant orange in dark mode */
+html.dark [class*="text-[#C65D3A]"],
+html.dark [class*="text-[#9f4120]"],
+html.dark [class*="text-[#c65d3a]"],
+html.dark .text-terracotta {
+  color: #fb923c !important;
+}
+
+/* Green status text stays vibrant green */
+html.dark [class*="text-[#10b981]"] {
+  color: #34d399 !important;
+}
+
+/* Universal Border overrides in dark mode */
+html.dark [class*="border-[#e5e0d8]"],
+html.dark [class*="border-[#E5E0D8]"],
+html.dark [class*="border-white"],
+html.dark [class*="border-gray-200"],
+html.dark .border-parchment {
+  border-color: #334155 !important;
+}
+
+/* Universal Card & Surface backgrounds in dark mode */
+html.dark .bg-white:not(.keep-white),
+html.dark [class*="bg-white"]:not(.keep-white),
+html.dark [class*="bg-[#ffffff]"]:not(.keep-white),
+html.dark [class*="bg-[#FFFDF8]"]:not(.keep-white),
+html.dark [class*="bg-[#fffdf8]"]:not(.keep-white),
+html.dark [class*="bg-[#fffbeb]"]:not(.keep-white),
+html.dark [class*="bg-[#FFFBEB]"]:not(.keep-white),
+html.dark [class*="bg-[#F7F5F0]"]:not(.keep-white),
+html.dark [class*="bg-[#EFECE5]"]:not(.keep-white),
+html.dark [class*="bg-[#E5E0D8]"]:not(.keep-white),
+html.dark [class*="bg-[#f5f3f3]"]:not(.keep-white),
+html.dark [class*="bg-[#f0ece9]"]:not(.keep-white),
+html.dark [class*="bg-[#fbf9f9]"]:not(.keep-white),
+html.dark [class*="bg-amber-50"]:not(.keep-white),
+html.dark [class*="bg-amber-100"]:not(.keep-white),
+html.dark [class*="bg-yellow-50"]:not(.keep-white),
+html.dark .bg-surface:not(.keep-white),
+html.dark .bg-canvas:not(.keep-white) {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.keep-white {
+  background-color: #ffffff !important;
+}
+
+/* Category chip hover and active buttons in dark mode */
+html.dark .hover\:bg-\[\#E5E0D8\]:hover,
+html.dark .hover\:bg-\[\#efeded\]:hover {
+  background-color: #334155 !important;
+  color: #38bdf8 !important;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.font-editorial {
+  font-family: 'Literata', serif;
+}
+
+.font-ui {
+  font-family: 'Inter', sans-serif;
+}
+
+.bg-canvas {
+  background-color: #F7F5F0;
+}
+
+.bg-surface {
+  background-color: #FFFDF8;
+}
+
+.text-charcoal {
+  color: #242424;
+}
+
+.text-muted-custom {
+  color: #777777;
+}
+
+.bg-slate-ink {
+  background-color: #1F2937;
+}
+
+.text-terracotta {
+  color: #C65D3A;
+}
+
+.bg-terracotta {
+  background-color: #C65D3A;
+}
+
+.border-parchment {
+  border-color: #E5E0D8;
+}
+
+/* Reader Container Constraints */
+.reader-container {
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'Literata', serif;
+  font-size: 19px;
+  line-height: 1.8;
+  color: #242424;
+}
+
+/* Button Pulse Zoom Loop on Hover */
+@keyframes pulseZoom {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 6px -1px rgba(198, 93, 58, 0.2);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 10px 15px -3px rgba(198, 93, 58, 0.4);
+  }
+}
+
+.hover-pulse-button:hover {
+  animation: pulseZoom 1s infinite ease-in-out;
+}
+
+/* 3D Book Container & Cover Flip Effect */
+.book-wrapper {
+  perspective: 1200px;
+}
+
+.book-cover-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+}
+
+.book-cover-3d.opening {
+  transform: rotateY(-75deg) scale(1.05);
+}
+
+@keyframes bookOpenGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-book-open {
+  animation: bookOpenGlow 0.5s ease-out forwards;
+}
+
+/* Smooth Dropdown Slide-Up & Fade Animation */
+@keyframes slideUpDropdown {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUpDropdown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
