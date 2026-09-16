@@ -82,3 +82,9 @@ Mở [http://localhost:3000](http://localhost:3000) trên trình duyệt để x
 
 Dự án được cấu hình sẵn 100% để deploy trực tiếp lên **Vercel**. 
 Chỉ cần liên kết kho lưu trữ GitHub này với Vercel, sau đó thiết lập 3 biến môi trường (`DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`) trong mục **Settings > Environment Variables** của Vercel là hệ thống sẽ tự động build và online hoàn hảo.
+
+## ⚖️ Bản quyền & Giấy phép (License & Copyright)
+
+© 2026 Truyện Vui. All rights reserved. 
+
+Khung kiến trúc và bộ source code này được thiết kế, tối ưu và sở hữu độc quyền bởi **qchicoder** cùng **ValcoreTech**. Mọi hành vi sao chép, phân phối, hoặc sử dụng mã nguồn này cho mục đích thương mại mà không có sự đồng ý bằng văn bản từ chủ sở hữu đều bị nghiêm cấm.
