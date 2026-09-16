@@ -16,6 +16,15 @@ export default function HomePage() {
   const [isOpeningBook, setIsOpeningBook] = useState(false);
   const [followedStoryIds, setFollowedStoryIds] = useState<number[]>([]);
 
+  const optimizeImgUrl = (url?: string | null, width = 300) => {
+    if (!url) return 'https://via.placeholder.com/300x450';
+    if (url.includes('images.unsplash.com')) {
+      const baseUrl = url.split('?')[0];
+      return `${baseUrl}?w=${width}&q=75&auto=format`;
+    }
+    return url;
+  };
+
   useEffect(() => {
     Promise.all([
       fetchApi('/stories'),
@@ -175,7 +184,7 @@ export default function HomePage() {
                         }`}
                       >
                         <img
-                          src={hero.cover_url || 'https://via.placeholder.com/300x400'}
+                          src={optimizeImgUrl(hero.cover_url, 400)}
                           alt={hero.title}
                           fetchPriority="high"
                           decoding="async"
@@ -313,10 +322,11 @@ export default function HomePage() {
                     >
                       <div className="aspect-[2/3] w-full relative overflow-hidden bg-[#EFECE5]">
                         <img
-                          src={story.cover_url || 'https://via.placeholder.com/300x450'}
+                          src={optimizeImgUrl(story.cover_url, 300)}
                           alt={story.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                           loading="lazy"
+                          decoding="async"
                         />
                         <span className="absolute top-2 left-2 bg-[#1F2937]/90 text-white text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded shadow">
                           {story.content_type === 'NOVEL' ? 'Tiểu Thuyết' : 'Comic'}
