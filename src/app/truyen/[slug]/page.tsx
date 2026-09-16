@@ -133,14 +133,16 @@ export default function StoryDetailPage() {
                 onClick={handleToggleFollow}
                 className={`text-xs font-bold px-6 py-2.5 rounded-xl transition-all shadow-xs flex items-center gap-1.5 transform hover:scale-[1.02] ${
                   isFollowing
-                    ? 'bg-[#10b981] text-white border border-[#10b981] shadow-md'
-                    : 'bg-[#fff4ed] dark:bg-amber-950/60 border border-[#ffc5b2] dark:border-amber-500/50 text-[#7c2d12] dark:text-[#fde68a] hover:bg-[#ffeade] dark:hover:bg-amber-900/80'
+                    ? 'bg-emerald-600 dark:bg-emerald-600 text-white border border-emerald-600 shadow-md hover:bg-emerald-700'
+                    : 'bg-amber-50 dark:bg-slate-800 border border-amber-200 dark:border-amber-500/50 hover:bg-amber-100 dark:hover:bg-slate-700 shadow-sm'
                 }`}
               >
-                <span className="material-symbols-outlined text-[18px]">
+                <span className={`material-symbols-outlined text-[18px] ${isFollowing ? 'text-white' : '!text-amber-900 dark:!text-amber-400'}`}>
                   {isFollowing ? 'bookmark_added' : 'bookmark_add'}
                 </span>
-                <span>{isFollowing ? '✓ Đã Theo Dõi Tủ Sách' : '+ Theo Dõi Tủ Sách'}</span>
+                <span className={isFollowing ? 'text-white' : '!text-amber-900 dark:!text-amber-400'}>
+                  {isFollowing ? '✓ Đã Theo Dõi Tủ Sách' : '+ Theo Dõi Tủ Sách'}
+                </span>
               </button>
             </div>
           </div>
