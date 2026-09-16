@@ -4,15 +4,15 @@ import { getAuthUser } from '@/lib/auth';
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const user = await getAuthUser(request);
   if (!user) {
     return NextResponse.json({ success: false, message: 'Bạn cần đăng nhập để theo dõi truyện.' }, { status: 401 });
   }
 
-  const { id } = await params;
-  const storyId = parseInt(id);
+  const { slug } = await params;
+  const storyId = parseInt(slug);
 
   if (isNaN(storyId)) {
     return NextResponse.json({ success: false, message: 'ID truyện không hợp lệ' }, { status: 400 });
