@@ -44,8 +44,36 @@ export default function ProfilePage() {
   const [publicLibrary, setPublicLibrary] = useState(true);
   const [showVipBadge, setShowVipBadge] = useState(true);
 
-  // Stats
+  // Stats & Library States
   const [followCount, setFollowCount] = useState(0);
+  const [followedStories, setFollowedStories] = useState<any[]>([]);
+  const [readingProgressList, setReadingProgressList] = useState<any[]>([]);
+  const [activeLibraryTab, setActiveLibraryTab] = useState<'follows' | 'progress'>('follows');
+
+  const optimizeImgUrl = (url?: string | null, width = 300) => {
+    if (!url) return 'https://via.placeholder.com/300x450';
+    if (url.includes('images.unsplash.com')) {
+      const baseUrl = url.split('?')[0];
+      return `${baseUrl}?w=${width}&q=75&auto=format`;
+    }
+    return url;
+  };
+
+  const handleUnfollowStory = async (e: React.MouseEvent, storyId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const res = await fetchApi(`/stories/${storyId}/follow`, { method: 'POST' });
+      if (!res.is_following) {
+        setFollowedStories((prev) => prev.filter((item) => item.story_id !== storyId));
+        setFollowCount((prev) => Math.max(0, prev - 1));
+        setSuccessMsg('Đã bỏ theo dõi tác phẩm khỏi tủ sách.');
+        setTimeout(() => setSuccessMsg(''), 3500);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Thao tác bỏ theo dõi thất bại.');
+    }
+  };
 
   // Clean basic preset avatars
   const basicAvatars = [
@@ -110,7 +138,12 @@ export default function ProfilePage() {
         setTempName(u.name || '');
         setAvatar(u.avatar || '');
         setTempAvatar(u.avatar || '');
-        setFollowCount(libraryRes.data?.follows?.length || 0);
+
+        const follows = libraryRes.data?.follows || [];
+        const progress = libraryRes.data?.reading_progress || [];
+        setFollowedStories(follows);
+        setReadingProgressList(progress);
+        setFollowCount(follows.length);
       })
       .catch((err) => {
         console.error(err);
@@ -424,6 +457,197 @@ export default function ProfilePage() {
               <div className="text-xs font-semibold text-[#44474c] dark:text-slate-300 mt-1">Trạng Thái Tài Khoản</div>
             </div>
           </div>
+        </div>
+
+        {/* FOLLOWED LIBRARY & SAVED BOOKS SECTION */}
+        <div className="bg-[#ffffff] dark:bg-[#1e293b] border border-[#e5e0d8] dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6 transition-colors">
+          {/* Header & Tabs */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#e5e0d8] dark:border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#ffdbd0] dark:bg-amber-950/60 text-[#9f4120] dark:text-amber-400 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[24px]">bookmark</span>
+              </div>
+              <div>
+                <h3 className="font-editorial text-xl font-bold text-[#0a1422] dark:text-slate-100">
+                  Tủ Sách Theo Dõi & Đã Lưu
+                </h3>
+                <p className="text-xs text-[#75777c] dark:text-slate-400">
+                  Danh sách các tác phẩm bạn đã bấm Theo Dõi hoặc Đang Đọc Dở
+                </p>
+              </div>
+            </div>
+
+            {/* Tab Selector Buttons */}
+            <div className="flex items-center gap-1 bg-[#f5f3f3] dark:bg-slate-800 p-1 rounded-xl border border-[#e5e0d8] dark:border-slate-700 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setActiveLibraryTab('follows')}
+                className={`px-3.5 py-1.5 rounded-lg transition ${
+                  activeLibraryTab === 'follows'
+                    ? 'bg-[#9f4120] dark:bg-amber-600 text-white shadow-xs'
+                    : 'text-[#75777c] dark:text-slate-300 hover:text-[#0a1422] dark:hover:text-white'
+                }`}
+              >
+                Truyện Theo Dõi ({followedStories.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveLibraryTab('progress')}
+                className={`px-3.5 py-1.5 rounded-lg transition ${
+                  activeLibraryTab === 'progress'
+                    ? 'bg-[#9f4120] dark:bg-amber-600 text-white shadow-xs'
+                    : 'text-[#75777c] dark:text-slate-300 hover:text-[#0a1422] dark:hover:text-white'
+                }`}
+              >
+                Đang Đọc Dở ({readingProgressList.length})
+              </button>
+            </div>
+          </div>
+
+          {/* Tab 1: Followed Stories Grid */}
+          {activeLibraryTab === 'follows' && (
+            <div>
+              {followedStories.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {followedStories.map((item) => {
+                    const story = item.story;
+                    if (!story) return null;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="group bg-[#fbf9f9] dark:bg-slate-800/60 border border-[#e5e0d8] dark:border-slate-700/60 rounded-xl overflow-hidden flex flex-col justify-between relative shadow-2xs hover:shadow-md transition duration-200"
+                      >
+                        {/* Cover Image */}
+                        <Link href={`/truyen/${story.slug}`} className="aspect-[2/3] w-full relative overflow-hidden bg-[#EFECE5] block">
+                          <img
+                            src={optimizeImgUrl(story.cover_url, 300)}
+                            alt={story.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                            loading="lazy"
+                          />
+                          <span className="absolute top-2 left-2 bg-[#1F2937]/90 text-white text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shadow">
+                            {story.content_type === 'NOVEL' ? 'Tiểu Thuyết' : 'Comic'}
+                          </span>
+
+                          {/* Unfollow Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => handleUnfollowStory(e, story.id)}
+                            title="Bỏ theo dõi tác phẩm"
+                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600/90 text-white flex items-center justify-center hover:bg-red-700 shadow transition"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">bookmark_remove</span>
+                          </button>
+                        </Link>
+
+                        {/* Info */}
+                        <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
+                          <div>
+                            <Link href={`/truyen/${story.slug}`} className="font-editorial text-xs font-bold text-[#0a1422] dark:text-slate-100 line-clamp-1 hover:text-[#9f4120] dark:hover:text-amber-400 transition">
+                              {story.title}
+                            </Link>
+                            <p className="text-[11px] text-[#75777c] dark:text-slate-400 line-clamp-1 mt-0.5">
+                              {story.author?.name || 'Văn Đàn'}
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-[#e5e0d8]/60 dark:border-slate-700/50 flex items-center justify-between gap-1">
+                            <span className="text-[10px] font-semibold text-[#9f4120] dark:text-amber-400 bg-[#ffdbd0]/40 dark:bg-amber-950/40 px-2 py-0.5 rounded truncate">
+                              {story.category?.name || 'Tủ Sách'}
+                            </span>
+                            <Link
+                              href={`/truyen/${story.slug}`}
+                              className="text-[10px] font-bold text-white bg-[#9f4120] dark:bg-amber-600 hover:bg-[#732102] px-2.5 py-1 rounded-md transition shrink-0"
+                            >
+                              Đọc Sách
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 text-center space-y-3 bg-[#fbf9f9] dark:bg-slate-800/40 rounded-xl border border-dashed border-[#e5e0d8] dark:border-slate-700">
+                  <div className="w-12 h-12 rounded-full bg-[#ffdbd0]/60 dark:bg-amber-950/40 text-[#9f4120] dark:text-amber-400 flex items-center justify-center mx-auto">
+                    <span className="material-symbols-outlined text-[24px]">bookmark_border</span>
+                  </div>
+                  <p className="text-xs text-[#75777c] dark:text-slate-400 font-medium">
+                    Bạn chưa nhấn Theo Dõi cuốn sách nào vào tủ sách.
+                  </p>
+                  <Link
+                    href="/tim-kiem"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#9f4120] dark:bg-amber-600 hover:bg-[#732102] px-4 py-2 rounded-xl transition shadow-xs"
+                  >
+                    <span>Khám Phá Sách Mới</span>
+                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab 2: Reading Progress Grid */}
+          {activeLibraryTab === 'progress' && (
+            <div>
+              {readingProgressList.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {readingProgressList.map((rp) => {
+                    const story = rp.story;
+                    const chapter = rp.chapter;
+                    if (!story) return null;
+
+                    return (
+                      <div
+                        key={rp.id}
+                        className="bg-[#fbf9f9] dark:bg-slate-800/60 border border-[#e5e0d8] dark:border-slate-700/60 rounded-xl p-4 flex gap-4 items-center shadow-2xs hover:shadow-sm transition"
+                      >
+                        <Link href={`/truyen/${story.slug}`} className="w-16 h-24 flex-shrink-0 rounded-lg overflow-hidden border border-[#e5e0d8] dark:border-slate-700 shadow-xs block">
+                          <img src={optimizeImgUrl(story.cover_url, 200)} alt={story.title} className="w-full h-full object-cover" />
+                        </Link>
+
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <Link href={`/truyen/${story.slug}`} className="font-editorial text-sm font-bold text-[#0a1422] dark:text-slate-100 truncate block hover:text-[#9f4120] dark:hover:text-amber-400">
+                            {story.title}
+                          </Link>
+
+                          {chapter && (
+                            <div className="text-xs font-semibold text-[#9f4120] dark:text-amber-400 bg-[#ffdbd0]/30 dark:bg-amber-950/40 px-2 py-0.5 rounded inline-block">
+                              Đang dừng ở: Chương {chapter.chapter_number}
+                            </div>
+                          )}
+
+                          <p className="text-[11px] text-[#75777c] dark:text-slate-400">
+                            Tác giả: {story.author?.name || 'Văn Đàn'}
+                          </p>
+
+                          {chapter && (
+                            <Link
+                              href={`/truyen/${story.slug}/chuong/${chapter.slug || `chuong-${chapter.chapter_number}`}`}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-white bg-[#9f4120] dark:bg-amber-600 hover:bg-[#732102] px-3 py-1.5 rounded-lg transition shadow-2xs mt-1"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">play_arrow</span>
+                              <span>Đọc Tiếp Chương {chapter.chapter_number}</span>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 text-center space-y-3 bg-[#fbf9f9] dark:bg-slate-800/40 rounded-xl border border-dashed border-[#e5e0d8] dark:border-slate-700">
+                  <div className="w-12 h-12 rounded-full bg-[#ffdbd0]/60 dark:bg-amber-950/40 text-[#9f4120] dark:text-amber-400 flex items-center justify-center mx-auto">
+                    <span className="material-symbols-outlined text-[24px]">history_edu</span>
+                  </div>
+                  <p className="text-xs text-[#75777c] dark:text-slate-400 font-medium">
+                    Chưa có lịch sử đọc dở tác phẩm nào.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* DIRECT SETTINGS ACCESS BANNER */}
