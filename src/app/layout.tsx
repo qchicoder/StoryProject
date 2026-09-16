@@ -34,15 +34,7 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
-          media="print"
-          onLoad={(e: any) => { e.currentTarget.media = 'all'; }}
         />
-        <noscript>
-          <link
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
-            rel="stylesheet"
-          />
-        </noscript>
       </head>
       <body className="bg-[#fbf9f9] text-[#1b1c1c] min-h-screen flex flex-col antialiased">
         <Header />
