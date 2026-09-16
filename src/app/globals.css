@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -124,16 +123,16 @@ html.dark .hover\:bg-\[\#efeded\]:hover {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), 'Inter', sans-serif;
   min-height: 100vh;
 }
 
 .font-editorial {
-  font-family: 'Literata', serif;
+  font-family: var(--font-literata), 'Literata', serif;
 }
 
 .font-ui {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), 'Inter', sans-serif;
 }
 
 .bg-canvas {

@@ -177,6 +177,8 @@ export default function HomePage() {
                         <img
                           src={hero.cover_url || 'https://via.placeholder.com/300x400'}
                           alt={hero.title}
+                          fetchPriority="high"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                         <span className="absolute top-3 left-3 bg-[#1F2937] text-[#FFFDF8] text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded shadow">
