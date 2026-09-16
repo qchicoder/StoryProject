@@ -1,0 +1,349 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  name             String
+  email            String             @unique
+  password         String
+  role             String             @default("USER") // "USER" | "ADMIN" | "AUTHOR"
+  avatar           String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  wallet           CoinWallet?
+  readingProgress  ReadingProgress[]
+  bookmarks        Bookmark[]
+  follows          Follow[]
+  readingHistories ReadingHistory[]
+  comments         Comment[]
+  commentLikes     CommentLike[]
+  commentReports   CommentReport[]
+  chapterUnlocks   ChapterUnlock[]
+  payments         Payment[]
+
+  @@map("users")
+}
+
+model CoinWallet {
+  id           Int               @id @default(autoincrement())
+  userId       Int               @unique @map("user_id")
+  balance      Int               @default(0)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions CoinTransaction[]
+
+  @@map("coin_wallets")
+}
+
+model CoinTransaction {
+  id          Int        @id @default(autoincrement())
+  walletId    Int        @map("wallet_id")
+  amount      Int // Positive for deposit, negative for spend
+  type        String // PURCHASE, SPEND, REFUND, ADMIN_ADJUST
+  description String
+  referenceId String?    @map("reference_id")
+  createdAt   DateTime   @default(now())
+
+  wallet      CoinWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@map("coin_transactions")
+}
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  bio       String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stories   Story[]
+
+  @@map("authors")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stories     Story[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id        Int        @id @default(autoincrement())
+  name      String
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  stories   StoryTag[]
+
+  @@map("tags")
+}
+
+model Story {
+  id               Int                @id @default(autoincrement())
+  title            String
+  slug             String             @unique
+  summary          String?
+  coverUrl         String?            @map("cover_url")
+  contentType      String             @default("NOVEL") @map("content_type") // NOVEL | COMIC
+  status           String             @default("PUBLISHED") // DRAFT | PUBLISHED | COMPLETED
+  viewCount        Int                @default(0) @map("view_count")
+  authorId         Int                @map("author_id")
+  categoryId       Int                @map("category_id")
+  isFeatured       Boolean            @default(false) @map("is_featured")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  author           Author             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category         Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tags             StoryTag[]
+  chapters         Chapter[]
+  readingProgress  ReadingProgress[]
+  bookmarks        Bookmark[]
+  follows          Follow[]
+  readingHistories ReadingHistory[]
+  comments         Comment[]
+
+  @@map("stories")
+}
+
+model StoryTag {
+  id        Int      @id @default(autoincrement())
+  storyId   Int      @map("story_id")
+  tagId     Int      @map("tag_id")
+  createdAt DateTime @default(now())
+
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, tagId])
+  @@map("story_tags")
+}
+
+model Chapter {
+  id               Int                @id @default(autoincrement())
+  storyId          Int                @map("story_id")
+  chapterNumber    Int                @map("chapter_number")
+  title            String
+  slug             String
+  isPaid           Boolean            @default(false) @map("is_paid")
+  coinPrice        Int                @default(0) @map("coin_price")
+  viewCount        Int                @default(0) @map("view_count")
+  status           String             @default("PUBLISHED") // DRAFT | PUBLISHED
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  story            Story              @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  textContent      ChapterContent?
+  comicImages      ComicImage[]
+  readingProgress  ReadingProgress[]
+  bookmarks        Bookmark[]
+  readingHistories ReadingHistory[]
+  comments         Comment[]
+  chapterUnlocks   ChapterUnlock[]
+
+  @@unique([storyId, chapterNumber])
+  @@map("chapters")
+}
+
+model ChapterContent {
+  id        Int      @id @default(autoincrement())
+  chapterId Int      @unique @map("chapter_id")
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@map("chapter_contents")
+}
+
+model ComicImage {
+  id         Int      @id @default(autoincrement())
+  chapterId  Int      @map("chapter_id")
+  imageUrl   String   @map("image_url")
+  orderIndex Int      @default(0) @map("order_index")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@map("comic_images")
+}
+
+model ReadingProgress {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  storyId       Int      @map("story_id")
+  lastChapterId Int      @map("last_chapter_id")
+  lastReadAt    DateTime @default(now()) @map("last_read_at")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story         Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  chapter       Chapter  @relation(fields: [lastChapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@map("reading_progress")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  storyId   Int      @map("story_id")
+  chapterId Int      @map("chapter_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@map("bookmarks")
+}
+
+model Follow {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  storyId   Int      @map("story_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@map("follows")
+}
+
+model ReadingHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  storyId   Int      @map("story_id")
+  chapterId Int      @map("chapter_id")
+  readAt    DateTime @default(now()) @map("read_at")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@map("reading_histories")
+}
+
+model Comment {
+  id         Int           @id @default(autoincrement())
+  userId     Int           @map("user_id")
+  storyId    Int           @map("story_id")
+  chapterId  Int?          @map("chapter_id")
+  parentId   Int?          @map("parent_id")
+  content    String
+  likesCount Int           @default(0) @map("likes_count")
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story      Story         @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  chapter    Chapter?      @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  parent     Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    Comment[]     @relation("CommentReplies")
+  likes      CommentLike[]
+  reports    CommentReport[]
+
+  @@map("comments")
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  commentId Int      @map("comment_id")
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@map("comment_likes")
+}
+
+model CommentReport {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  commentId Int      @map("comment_id")
+  reason    String
+  status    String   @default("PENDING") // PENDING | RESOLVED | DISMISSED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@map("comment_reports")
+}
+
+model ChapterUnlock {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  chapterId  Int      @map("chapter_id")
+  coinsSpent Int      @map("coins_spent")
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+  @@map("chapter_unlocks")
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  paymentMethod   String   @map("payment_method") // MOMO, VIETQR, BANK_TRANSFER, SCRATCH_CARD
+  coinsAmount     Int      @map("coins_amount")
+  moneyAmount     Float    @map("money_amount")
+  transactionCode String   @unique @map("transaction_code")
+  status          String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  payload         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Advertisement {
+  id         Int      @id @default(autoincrement())
+  title      String
+  placement  String   @default("CHAPTER_BOTTOM") // HEADER | CHAPTER_BOTTOM | SIDEBAR
+  type       String   @default("IMAGE") // IMAGE | ADSENSE | AFFILIATE
+  imageUrl   String?  @map("image_url")
+  targetUrl  String?  @map("target_url")
+  scriptCode String?  @map("script_code")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("advertisements")
+}
